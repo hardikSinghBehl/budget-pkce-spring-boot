@@ -2,26 +2,35 @@ package com.behl.ehrmantraut.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.behl.ehrmantraut.dto.AuthenticationRequestDto;
+import com.behl.ehrmantraut.dto.AuthenticationSuccessDto;
+import com.behl.ehrmantraut.dto.CodeExchangeRequestDto;
 import com.behl.ehrmantraut.dto.UserAuthenticationDto;
 import com.behl.ehrmantraut.dto.UserCreationRequestDto;
 import com.behl.ehrmantraut.entity.User;
+import com.behl.ehrmantraut.exception.CodeChallengeAndVerifierMismatchException;
 import com.behl.ehrmantraut.exception.DuplicateEmailIdException;
 import com.behl.ehrmantraut.exception.GenericBadRequestException;
+import com.behl.ehrmantraut.exception.InvalidCodeException;
 import com.behl.ehrmantraut.exception.InvalidCredentialsException;
 import com.behl.ehrmantraut.repository.UserRepository;
 import com.behl.ehrmantraut.security.configuration.properties.PkceConfigurationProperties;
 import com.behl.ehrmantraut.security.configuration.properties.PkceConfigurationProperties.Security;
+import com.behl.ehrmantraut.security.utility.JwtUtils;
 import com.behl.ehrmantraut.utility.CodeUtility;
 import com.google.common.cache.LoadingCache;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @EnableConfigurationProperties(value = PkceConfigurationProperties.class)
@@ -31,6 +40,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final LoadingCache<String, UserAuthenticationDto> codeCache;
     private final PkceConfigurationProperties pkceConfigurationProperties;
+    private final JwtUtils jwtUtils;
 
     public void create(final UserCreationRequestDto userCreationRequestDto) {
         if (!isEmailIdUnique(userCreationRequestDto.getEmailId()))
@@ -65,6 +75,44 @@ public class UserService {
         response.put("code", generatedCode);
         response.put("state", authenticationRequestDto.getState());
         return response;
+    }
+
+    public AuthenticationSuccessDto exchangeCode(final CodeExchangeRequestDto codeExchangeRequestDto) {
+        final var securityProperties = pkceConfigurationProperties.getSecurity();
+        validateCodeExchangeRequest(codeExchangeRequestDto, securityProperties);
+
+        UserAuthenticationDto userAuthenticationRequest;
+        try {
+            if (codeCache.get(codeExchangeRequestDto.getCode()) != null)
+                userAuthenticationRequest = codeCache.get(codeExchangeRequestDto.getCode());
+            else
+                throw new InvalidCodeException();
+        } catch (ExecutionException e) {
+            log.error("Unable to fetch code: ", e);
+            throw new InvalidCodeException();
+        }
+        codeCache.invalidate(codeExchangeRequestDto.getCode());
+
+        final var generatedCodeChallenge = CodeUtility.codeChallengeGenerator()
+                .generate(codeExchangeRequestDto.getCodeVerifier());
+
+        if (!generatedCodeChallenge.equals(userAuthenticationRequest.getAuthentication().getCodeChallenge()))
+            throw new CodeChallengeAndVerifierMismatchException();
+
+        final var user = userRepository.findById(userAuthenticationRequest.getUserId()).get();
+        return AuthenticationSuccessDto.builder().accessToken(jwtUtils.generateAccessToken(user))
+                .refreshToken(jwtUtils.generateRefreshToken(user)).tokenType("Bearer")
+                .expiresIn(TimeUnit.HOURS.toSeconds(1)).build();
+    }
+
+    private void validateCodeExchangeRequest(final CodeExchangeRequestDto codeExchangeRequestDto,
+            final Security securityProperties) {
+        if (!codeExchangeRequestDto.getClientId().equals(securityProperties.getClientId()))
+            throw new GenericBadRequestException("Invalid client-id");
+        if (!codeExchangeRequestDto.getGrantType().equals(securityProperties.getGrantType()))
+            throw new GenericBadRequestException("Invalid grant-type value");
+        if (!codeExchangeRequestDto.getRedirectUri().equals(securityProperties.getRedirectUri()))
+            throw new GenericBadRequestException("Invalid redirect-uri");
     }
 
     private void validateAuthenticationRequest(final AuthenticationRequestDto authenticationRequestDto,
