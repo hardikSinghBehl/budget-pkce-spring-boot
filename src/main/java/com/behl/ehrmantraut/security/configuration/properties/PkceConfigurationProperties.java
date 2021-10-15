@@ -18,6 +18,7 @@ public class PkceConfigurationProperties {
         private String responseType;
         private String codeChallengeMethod;
         private String grantType;
+        private Integer codeExpirationMinutes;
 
     }
 

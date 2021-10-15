@@ -1,5 +1,6 @@
 package com.behl.ehrmantraut.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,7 @@ import com.behl.ehrmantraut.entity.User;
 public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmailId(final String emailId);
+
+    Optional<User> findByEmailId(final String emailId);
 
 }

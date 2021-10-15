@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CodeChallengeGenerator {
 
-    public static String generate(final String codeVerifier) {
+    public String generate(final String codeVerifier) {
         byte[] digest = null;
         try {
             byte[] bytes = codeVerifier.getBytes("US-ASCII");

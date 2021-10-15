@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.behl.ehrmantraut.dto.AuthenticationRequestDto;
 import com.behl.ehrmantraut.dto.UserCreationRequestDto;
 import com.behl.ehrmantraut.service.UserService;
+import com.behl.ehrmantraut.utility.RedirectUriBuilder;
 import com.behl.ehrmantraut.utility.ResponseProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +30,16 @@ public class AuthenticationController {
             @RequestBody(required = true) final UserCreationRequestDto userCreationRequestDto) {
         userService.create(userCreationRequestDto);
         return ResponseEntity.ok(ResponseProvider.userCreationSuccess());
+    }
+
+    @PostMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.OK)
+    @Operation(summary = "Returns code that can be used to get access_token")
+    public ResponseEntity<?> userAuthenticationHandler(
+            @RequestBody(required = true) final AuthenticationRequestDto authenticationRequestDto) {
+        final var response = userService.authenticate(authenticationRequestDto);
+        return ResponseEntity.status(HttpStatus.FOUND).location(RedirectUriBuilder
+                .build(authenticationRequestDto.getRedirectUri(), response.get("code"), response.get("state"))).build();
     }
 
 }
