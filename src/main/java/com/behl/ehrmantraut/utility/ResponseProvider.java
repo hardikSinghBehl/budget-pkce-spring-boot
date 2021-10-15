@@ -11,4 +11,10 @@ public class ResponseProvider {
         return response;
     }
 
+    public static Map<String, String> generateJoke() {
+        final var response = new HashMap<String, String>();
+        response.put("Joke", "Chameleons are supposed to blend well, but I think it's ruined this smoothie.");
+        return response;
+    }
+
 }
