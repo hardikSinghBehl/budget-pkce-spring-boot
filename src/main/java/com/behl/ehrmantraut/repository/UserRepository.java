@@ -10,4 +10,6 @@ import com.behl.ehrmantraut.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
+    boolean existsByEmailId(final String emailId);
+
 }
