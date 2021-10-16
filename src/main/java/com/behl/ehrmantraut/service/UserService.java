@@ -10,12 +10,12 @@ import com.behl.ehrmantraut.dto.UserCreationRequestDto;
 
 public interface UserService {
 
-    void create(UserCreationRequestDto userCreationRequestDto);
+    void create(final UserCreationRequestDto userCreationRequestDto);
 
-    Map<String, String> authenticate(AuthenticationRequestDto authenticationRequestDto);
+    Map<String, String> authenticate(final AuthenticationRequestDto authenticationRequestDto);
 
-    AuthenticationSuccessDto exchangeCode(CodeExchangeRequestDto codeExchangeRequestDto);
+    AuthenticationSuccessDto exchangeCode(final CodeExchangeRequestDto codeExchangeRequestDto);
 
-    AuthenticationSuccessDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
+    AuthenticationSuccessDto refreshToken(final RefreshTokenRequestDto refreshTokenRequestDto);
 
 }

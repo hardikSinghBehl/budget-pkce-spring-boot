@@ -115,6 +115,9 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public AuthenticationSuccessDto refreshToken(final RefreshTokenRequestDto refreshTokenRequestDto) {
+        if (!refreshTokenRequestDto.getClientId().equals(pkceConfigurationProperties.getSecurity().getClientId()))
+            throw new GenericBadRequestException("Invalid client-id");
+
         if (jwtUtils.isTokenExpired(refreshTokenRequestDto.getRefreshToken()))
             throw new GenericUnauthorizedExcpetion();
         final var user = userRepository.findByEmailId(jwtUtils.extractEmail(refreshTokenRequestDto.getRefreshToken()))
