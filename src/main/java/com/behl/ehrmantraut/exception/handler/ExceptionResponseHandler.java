@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.behl.ehrmantraut.exception.CodeChallengeAndVerifierMismatchException;
 import com.behl.ehrmantraut.exception.DuplicateEmailIdException;
 import com.behl.ehrmantraut.exception.GenericBadRequestException;
+import com.behl.ehrmantraut.exception.GenericUnauthorizedExcpetion;
 import com.behl.ehrmantraut.exception.InvalidCodeException;
 import com.behl.ehrmantraut.exception.InvalidCredentialsException;
 import com.behl.ehrmantraut.exception.dto.ExceptionResponseDto;
@@ -74,6 +75,15 @@ public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
         log.error("Exception Caught:", exception);
         return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED)
                 .body(new ExceptionResponseDto("Code verifier does not correspond to earlier provided code challenge"));
+    }
+
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    @ExceptionHandler(GenericUnauthorizedExcpetion.class)
+    public ResponseEntity<?> genericUnauthorizedExcpetionHandler(final GenericUnauthorizedExcpetion exception) {
+        log.error("Exception Caught:", exception);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ExceptionResponseDto("You are unauthorized to perform this action"));
     }
 
     @Override

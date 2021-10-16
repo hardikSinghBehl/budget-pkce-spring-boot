@@ -19,6 +19,12 @@ public class PkceConfigurationProperties {
         private String codeChallengeMethod;
         private String grantType;
         private Integer codeExpirationMinutes;
+        private Refresh refresh = new Refresh();
+
+        @Data
+        public class Refresh {
+            private String grantType;
+        }
 
     }
 

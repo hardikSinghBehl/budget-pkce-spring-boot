@@ -6,18 +6,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.behl.ehrmantraut.dto.AuthenticationRequestDto;
 import com.behl.ehrmantraut.dto.AuthenticationSuccessDto;
 import com.behl.ehrmantraut.dto.CodeExchangeRequestDto;
+import com.behl.ehrmantraut.dto.RefreshTokenRequestDto;
 import com.behl.ehrmantraut.dto.UserAuthenticationDto;
 import com.behl.ehrmantraut.dto.UserCreationRequestDto;
 import com.behl.ehrmantraut.entity.User;
 import com.behl.ehrmantraut.exception.CodeChallengeAndVerifierMismatchException;
 import com.behl.ehrmantraut.exception.DuplicateEmailIdException;
 import com.behl.ehrmantraut.exception.GenericBadRequestException;
+import com.behl.ehrmantraut.exception.GenericUnauthorizedExcpetion;
 import com.behl.ehrmantraut.exception.InvalidCodeException;
 import com.behl.ehrmantraut.exception.InvalidCredentialsException;
 import com.behl.ehrmantraut.repository.UserRepository;
@@ -102,6 +106,16 @@ public class UserService {
         final var user = userRepository.findById(userAuthenticationRequest.getUserId()).get();
         return AuthenticationSuccessDto.builder().accessToken(jwtUtils.generateAccessToken(user))
                 .refreshToken(jwtUtils.generateRefreshToken(user)).tokenType("Bearer")
+                .expiresIn(TimeUnit.HOURS.toSeconds(1)).build();
+    }
+
+    public AuthenticationSuccessDto refreshToken(final RefreshTokenRequestDto refreshTokenRequestDto) {
+        if (jwtUtils.isTokenExpired(refreshTokenRequestDto.getRefreshToken()))
+            throw new GenericUnauthorizedExcpetion();
+        final var user = userRepository.findByEmailId(jwtUtils.extractEmail(refreshTokenRequestDto.getRefreshToken()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        return AuthenticationSuccessDto.builder().accessToken(jwtUtils.generateAccessToken(user))
+                .refreshToken(refreshTokenRequestDto.getRefreshToken()).tokenType("Bearer")
                 .expiresIn(TimeUnit.HOURS.toSeconds(1)).build();
     }
 
