@@ -28,7 +28,7 @@ public class CodeExchangeRequestDto {
     @NotBlank(message = "redirectUri must not be empty")
     private final String redirectUri;
 
-    @Schema(description = "value from which codeChallenge was generated in the /authenticate endpoint")
+    @Schema(description = "value from which codeChallenge was generated in the /authenticate endpoint", example = "dcFKDCmdcYmcmW6DXu2BfSrkGB1cKwFAI5Jv7he9RDo")
     @NotBlank(message = "codeVerifier must not be empty")
     private final String codeVerifier;
 
