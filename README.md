@@ -1,6 +1,6 @@
 ## Low Budget Proof Key for Code Exchange (PKCE) Implementation using Java Spring-boot
-### Screen Recording showing Auth Flow (50 Seconds)
-https://user-images.githubusercontent.com/69693621/137589945-96fc2fc4-a969-4462-a534-41b15a12c0af.mov
+### Screen Recording showing Auth Flow (62 Seconds)
+https://user-images.githubusercontent.com/69693621/137596996-2b5d48ce-9d5b-4e17-9472-c774eddd725f.mov
 
 ---
 ## Authorization Code Flow with Proof Key for Code Exchange (PKCE)
