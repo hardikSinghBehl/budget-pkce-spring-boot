@@ -1,5 +1,7 @@
 package com.behl.ehrmantraut.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,7 @@ public class AuthenticationController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Creates a user record in the system")
     public ResponseEntity<?> userCreationHandler(
-            @RequestBody(required = true) final UserCreationRequestDto userCreationRequestDto) {
+            @Valid @RequestBody(required = true) final UserCreationRequestDto userCreationRequestDto) {
         userService.create(userCreationRequestDto);
         return ResponseEntity.ok(ResponseProvider.userCreationSuccess());
     }
@@ -45,7 +47,7 @@ public class AuthenticationController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Returns code that can be used to get access_token")
     public ResponseEntity<?> userAuthenticationHandler(
-            @RequestBody(required = true) final AuthenticationRequestDto authenticationRequestDto) {
+            @Valid @RequestBody(required = true) final AuthenticationRequestDto authenticationRequestDto) {
         final var response = userService.authenticate(authenticationRequestDto);
         return ResponseEntity.status(HttpStatus.FOUND).location(RedirectUriBuilder
                 .build(authenticationRequestDto.getRedirectUri(), response.get("code"), response.get("state"))).build();
@@ -59,7 +61,7 @@ public class AuthenticationController {
     @ResponseStatus(value = HttpStatus.OK)
     @Operation(summary = "Returns token(s) in exchange of code")
     public ResponseEntity<AuthenticationSuccessDto> tokenExchangeHandler(
-            @RequestBody(required = true) final CodeExchangeRequestDto codeExchangeRequestDto) {
+            @Valid @RequestBody(required = true) final CodeExchangeRequestDto codeExchangeRequestDto) {
         return ResponseEntity.ok(userService.exchangeCode(codeExchangeRequestDto));
     }
 
