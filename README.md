@@ -77,10 +77,14 @@ com.behl.ehrmantraut.security.code-expiration-minutes=2
 ```
 * The recieved `accessToken` allows the client to make requests to the Server on behalf of the logged in-user using the `Authorization Bearer Mechanism`.
 
-
-
-
-
+6.) A request to refresh an access token can be sent to the same `/token endpoint` with the below data in the request body (Sample JSON given)
+```
+{
+    "clientId": "<Client-id as configured in .properties file>",
+    "grantType": "refresh_token",
+    "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaWtlLmVocm1hbnRyYXV0QGdtYWlsLmNvbSIsImV4cCI6MTYzNTY5MTQyMiwiaWF0IjoxNjM0Mzk1NDIyfQ.Lf7dQNSDZ9NUp6W4a8HwtZb0dWrgy9wpsxH4Pjb2VOg"
+}
+```
 
 
 
