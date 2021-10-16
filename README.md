@@ -1,4 +1,5 @@
 ## Low Budget Proof Key for Code Exchange (PKCE) Implementation using Java Spring-boot
+#### Just for fun, low budget implementation of PKCE Auth Flow using a single Spring-boot application that exposes APIs to act as an authorization and resource server both. 
 ### Screen Recording showing Auth Flow (62 Seconds)
 https://user-images.githubusercontent.com/69693621/137596996-2b5d48ce-9d5b-4e17-9472-c774eddd725f.mov
 
@@ -85,6 +86,38 @@ com.behl.ehrmantraut.security.code-expiration-minutes=2
     "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtaWtlLmVocm1hbnRyYXV0QGdtYWlsLmNvbSIsImV4cCI6MTYzNTY5MTQyMiwiaWF0IjoxNjM0Mzk1NDIyfQ.Lf7dQNSDZ9NUp6W4a8HwtZb0dWrgy9wpsxH4Pjb2VOg"
 }
 ```
+--- 
 
+### PRs welcome, Star repository to show support
+### Tech stack used
+* Java 17
+* Spring-boot 2.5.5
+* Spring-Security and [JJWT](https://github.com/jwtk/jjwt)
+* Spring-JPA/Hibernate
+* H2 in-memory DB
+* Lombok
+* LoadingCache (in [Guava](https://github.com/google/guava)) to store userAuthenticationDetails in memory
 
+### Local Setup
+* Install Java 17 (recommended to use [SdkMan](https://sdkman.io))
 
+`sdk install java 17-open`
+* Install Maven (recommended to use [SdkMan](https://sdkman.io))
+
+`sdk install maven`
+
+* Clone the repo and Go to application.properties under src/main/resources and configure properties as required
+
+* Run the below command in core
+
+`mvn clean install`
+
+* To start the application, run any of the below 2 commands
+
+`mvn spring-boot:run &`
+
+`java -jar /target/budget-pkce-0.0.1-SNAPSHOT.jar`
+
+* Access the swagger-ui
+
+`http://localhost:8080/swagger-ui.html`
