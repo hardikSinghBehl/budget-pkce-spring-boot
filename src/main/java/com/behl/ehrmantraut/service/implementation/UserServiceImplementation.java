@@ -30,6 +30,7 @@ import com.behl.ehrmantraut.security.configuration.properties.PkceConfigurationP
 import com.behl.ehrmantraut.security.utility.JwtUtils;
 import com.behl.ehrmantraut.service.UserService;
 import com.behl.ehrmantraut.utility.CodeUtility;
+import com.behl.ehrmantraut.utility.RequestReader;
 import com.google.common.cache.LoadingCache;
 
 import lombok.AllArgsConstructor;
@@ -46,6 +47,7 @@ public class UserServiceImplementation implements UserService {
     private final LoadingCache<String, UserAuthenticationDto> codeCache;
     private final PkceConfigurationProperties pkceConfigurationProperties;
     private final JwtUtils jwtUtils;
+    private final RequestReader requestReader;
 
     @Override
     public void create(final UserCreationRequestDto userCreationRequestDto) {
@@ -87,7 +89,6 @@ public class UserServiceImplementation implements UserService {
     @Override
     public AuthenticationSuccessDto exchangeCode(final CodeExchangeRequestDto codeExchangeRequestDto) {
         final var securityProperties = pkceConfigurationProperties.getSecurity();
-        validateCodeExchangeRequest(codeExchangeRequestDto, securityProperties);
 
         UserAuthenticationDto userAuthenticationRequest;
         try {
@@ -99,6 +100,8 @@ public class UserServiceImplementation implements UserService {
             log.error("Unable to fetch code: ", e);
             throw new InvalidCodeException();
         }
+        validateCodeExchangeRequest(codeExchangeRequestDto, securityProperties,
+                userAuthenticationRequest.getAuthentication());
         codeCache.invalidate(codeExchangeRequestDto.getCode());
 
         final var generatedCodeChallenge = CodeUtility.codeChallengeGenerator()
@@ -128,12 +131,12 @@ public class UserServiceImplementation implements UserService {
     }
 
     private void validateCodeExchangeRequest(final CodeExchangeRequestDto codeExchangeRequestDto,
-            final Security securityProperties) {
-        if (!codeExchangeRequestDto.getClientId().equals(securityProperties.getClientId()))
+            final Security securityProperties, final AuthenticationRequestDto authenticationRequestDto) {
+        if (!codeExchangeRequestDto.getClientId().equals(authenticationRequestDto.getClientId()))
             throw new GenericBadRequestException("Invalid client-id");
         if (!codeExchangeRequestDto.getGrantType().equals(securityProperties.getGrantType()))
             throw new GenericBadRequestException("Invalid grant-type value");
-        if (!codeExchangeRequestDto.getRedirectUri().equals(securityProperties.getRedirectUri()))
+        if (!codeExchangeRequestDto.getRedirectUri().equals(authenticationRequestDto.getRedirectUri()))
             throw new GenericBadRequestException("Invalid redirect-uri");
     }
 
@@ -143,7 +146,8 @@ public class UserServiceImplementation implements UserService {
             throw new GenericBadRequestException("Invalid client-id");
         if (!authenticationRequestDto.getResponseType().equals(securityProperties.getResponseType()))
             throw new GenericBadRequestException("Invalid response-type value");
-        if (!authenticationRequestDto.getRedirectUri().equals(securityProperties.getRedirectUri()))
+        if (!requestReader.isValidRedirectUri(authenticationRequestDto.getRedirectUri(),
+                securityProperties.getRedirectUri()))
             throw new GenericBadRequestException("Invalid redirect-uri");
         if (!authenticationRequestDto.getCodeChallengeMethod().equals(securityProperties.getCodeChallengeMethod()))
             throw new GenericBadRequestException("Invalid code-challenge-method");

@@ -1,5 +1,6 @@
 package com.behl.ehrmantraut.utility;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.springframework.stereotype.Component;
@@ -29,6 +30,16 @@ public class RequestReader {
             throw new GenericBadRequestException("Request Body not properly constructed, No grantType found");
         }
         return request.get("grantType");
+    }
+
+    public boolean isValidRedirectUri(final String redirectUri, final String commaSeperatedRedirectUri) {
+        boolean result = false;
+        final var redirectUriList = Arrays.asList(commaSeperatedRedirectUri.split(","));
+        for (int i = 0; i < redirectUriList.size(); i++) {
+            if (redirectUriList.get(i).trim().equals(redirectUri))
+                result = true;
+        }
+        return result;
     }
 
 }
