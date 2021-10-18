@@ -64,7 +64,8 @@ public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidCodeException.class)
     public ResponseEntity<?> invalidCodeExceptionHandler(final InvalidCodeException exception) {
         log.error("Exception Caught:", exception);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ExceptionResponseDto("Code provided is invalid"));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ExceptionResponseDto("Code provided is either invalid or used"));
     }
 
     @ResponseStatus(value = HttpStatus.PRECONDITION_FAILED)

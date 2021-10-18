@@ -92,7 +92,7 @@ public class UserServiceImplementation implements UserService {
 
         UserAuthenticationDto userAuthenticationRequest;
         try {
-            if (codeCache.get(codeExchangeRequestDto.getCode()) != null)
+            if (codeCache.get(codeExchangeRequestDto.getCode()).getAuthentication() != null)
                 userAuthenticationRequest = codeCache.get(codeExchangeRequestDto.getCode());
             else
                 throw new InvalidCodeException();
